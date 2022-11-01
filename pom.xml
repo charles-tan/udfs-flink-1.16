@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>udfs-flink-1.16</artifactId>
+    <groupId>flink-issues</groupId>
+    <packaging>jar</packaging>
+    <version>0.0.1</version>
+
+    <properties>
+        <assembly.skipAssembly>false</assembly.skipAssembly>
+        <tescontainer-junit-jupiter.version>1.17.2</tescontainer-junit-jupiter.version>
+        <junit-jupiter.version>5.8.2</junit-jupiter.version>
+        <lombok.version>1.18.24</lombok.version>
+        <scala.binary.version>2.12</scala.binary.version>
+        <guava.version>30.1.1-jre</guava.version>
+        <java.version>11</java.version>
+        <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
+
+<!--        <flink.version>1.16.0</flink.version>-->
+        <flink.version>1.15.2</flink.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-table-planner_${scala.binary.version}</artifactId>
+            <version>${flink.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-connector-test-utils</artifactId>
+            <version>${flink.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
+                </exclusion>
+            </exclusions>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven-compiler-plugin.version}</version>
+                    <configuration>
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+</project>
