@@ -19,8 +19,8 @@
         <java.version>11</java.version>
         <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
 
-<!--        <flink.version>1.16.0</flink.version>-->
-        <flink.version>1.15.2</flink.version>
+        <flink.version>1.16.0</flink.version>
+<!--        <flink.version>1.15.2</flink.version>-->
     </properties>
 
     <dependencies>

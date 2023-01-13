@@ -29,9 +29,80 @@ public class UDFTest {
 
     final String TEST_FUNCTIONS_LOCATION = "src/test/resources/functions";
 
-
+    /**
+     * This one works on Flink 1.16.0
+     * @throws Exception
+     */
     @Test
     public void shouldGenerateFlinkJobForInteractiveQueryWithUDFSuccessfully() throws Exception {
+        final Path jarPath = Paths.get(TEST_FUNCTIONS_LOCATION, "user-functions.jar");
+        final String jarPathString = String.format("%s%s", "file://", jarPath.toAbsolutePath());
+        final Configuration config = new Configuration();
+        final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment(config);
+        final StreamTableEnvironment tEnv = StreamTableEnvironment.create(env);
+
+        final String functionClassName = "util.LowerCase";
+
+        tEnv.executeSql(String.format("create temporary system function LowerCase as '%s' using jar '%s'", functionClassName, jarPathString));
+
+        final Table table = tEnv.fromValues(
+            DataTypes.ROW(
+                DataTypes.FIELD("id", DataTypes.DECIMAL(10, 2)),
+                DataTypes.FIELD("name", DataTypes.STRING())
+            ),
+            row(1, "ABC"),
+            row(2L, "ABCDE")
+        );
+
+        final CloseableIterator<Row> iter = tEnv.sqlQuery("SELECT LowerCase(name) as name FROM " + table).execute().collect();
+        final List<Row> list = new ArrayList<>();
+        iter.forEachRemaining(list::add);
+
+        System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        System.out.println(list);
+    }
+
+    /**
+     * Same as test above but with checkpointing enabled.
+     * This one does not work on Flink 1.16.0 but should, enabling checkpointing somehow breaks UDFs.
+     * @throws Exception
+     */
+    @Test
+    public void shouldGenerateFlinkJobForInteractiveQueryWithUDFSuccessfullyWithCheckpointing() throws Exception {
+        final Path jarPath = Paths.get(TEST_FUNCTIONS_LOCATION, "user-functions.jar");
+        final String jarPathString = String.format("%s%s", "file://", jarPath.toAbsolutePath());
+        final Configuration config = new Configuration();
+        final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment(config);
+        env.enableCheckpointing(1000L);
+        final StreamTableEnvironment tEnv = StreamTableEnvironment.create(env);
+
+        final String functionClassName = "util.LowerCase";
+
+        tEnv.executeSql(String.format("create temporary system function LowerCase as '%s' using jar '%s'", functionClassName, jarPathString));
+
+        final Table table = tEnv.fromValues(
+            DataTypes.ROW(
+                DataTypes.FIELD("id", DataTypes.DECIMAL(10, 2)),
+                DataTypes.FIELD("name", DataTypes.STRING())
+            ),
+            row(1, "ABC"),
+            row(2L, "ABCDE")
+        );
+
+        final CloseableIterator<Row> iter = tEnv.sqlQuery("SELECT LowerCase(name) as name FROM " + table).execute().collect();
+        final List<Row> list = new ArrayList<>();
+        iter.forEachRemaining(list::add);
+
+        System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        System.out.println(list);
+    }
+
+    /**
+     * This one works on Flink 1.15.2 but breaks on Flink 1.16.0, recommended to use SQL `CREATE FUNCTION` approach to add UDF
+     * @throws Exception
+     */
+    @Test
+    public void shouldGenerateFlinkJobForInteractiveQueryWithUDFSuccessfullyOld() throws Exception {
         final Path jarPath = Paths.get(TEST_FUNCTIONS_LOCATION, "user-functions.jar");
         final String jarPathString = String.format("%s%s", "file://", jarPath.toAbsolutePath());
         final List<String> jarPathStrings = List.of(jarPathString);
